@@ -5,11 +5,7 @@
 
 [스크립트 설치](https://github.com/Ravenclaw5874/Umamusume-Champions-Meeting-Laptime-Table-Generator/raw/main/Laptime-Table-Generator.user.js)
 
-설치 후 [한국 우마무스메 레이스 에뮬레이터](http://race-ko.wf-calc.net/#/champions-meeting) 사이트에
-
-![](./버튼.png)
-
-'기록표 제작 시작' 버튼이 생깁니다.
+설치 후 [한국 우마무스메 레이스 에뮬레이터](http://race-ko.wf-calc.net/#/champions-meeting) 사이트에서
 
 ![](./저장형식.png)
 
