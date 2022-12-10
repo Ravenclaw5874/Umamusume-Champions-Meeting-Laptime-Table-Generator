@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
 // @match        http://race-ko.wf-calc.net/
@@ -14,6 +14,8 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.1 저장된 말딸 일괄 삭제 버튼 추가.
+
 1.0 완성
 */
 
@@ -116,14 +118,67 @@ var main = async function(CM_name) {
 
 }
 
+async function deleteSaves(CM_name) {
+    //확인 메시지
+    let choice = (CM_name === '')?
+        confirm(`저장된 말딸들을 모두 삭제합니까?`):
+        confirm(`저장된 ${CM_name}배 말딸들을 모두 삭제합니까?`);
+
+    //유저가 취소 선택
+    if (choice === false) return;
+
+    //삭제처리
+    //저장된 말딸 전부 불러오기
+    let savedListButtonNode = document.querySelector("#app > div.main-frame > form > div:nth-child(2) > div > div");
+    await savedListButtonNode.click();
+    await savedListButtonNode.click();
+    let savedUmaList = document.querySelectorAll("body > div.el-select-dropdown.el-popper:last-child > div.el-scrollbar > div:nth-child(1) > ul:nth-child(1) > li.el-select-dropdown__item");
+    //console.log(savedUmaList);
+
+    //삭제 버튼
+    let deleteButton = document.querySelector("#app > div.main-frame > form > div:nth-child(4) > div > span > span > button");
+    await deleteButton.click();
+    await deleteButton.click();
+    let deleteConfirmButton = document.querySelector("body > div:last-child > div.el-popconfirm > div > button.el-button.el-button--primary.el-button--mini");
+
+    //삭제 횟수 측정용
+    let delete_count = 0;
+
+    //전체 삭제
+    if (CM_name === '') {
+        for (let i=0; i<savedUmaList.length; i++) {
+            await savedUmaList[i].click();
+            await deleteConfirmButton.click();
+            delete_count++;
+        }
+    }
+    //필터 삭제
+    else {
+        for (let i=0; i<savedUmaList.length; i++) {
+            //챔미명과 저장된 챔미명이 다르면 다음 루프로
+            let words = savedUmaList[i].innerText.split(" ");
+            if (words[0] !== CM_name) continue;
+
+            await savedUmaList[i].click();
+            await deleteConfirmButton.click();
+            delete_count++;
+        }
+    }
+
+    //완료 메시지
+    alert(`총 ${delete_count}개의 저장된 말딸 정보를 삭제했습니다.`)
+}
+
 function createNode() {
-    let CM_input = document.querySelector("#app > div.main-frame > form > div:nth-child(8)").cloneNode(true)
+    //챔미 이름 필터 칸 생성
+    let CM_input = document.querySelector("#app > div.main-frame > form > div:nth-child(8)").cloneNode(true);
     let CM_nameNode = CM_input.querySelector("div > div > input");
     CM_nameNode.setAttribute("placeholder", "전체");
     CM_input.firstChild.innerText = "배";
     CM_input.appendChild(CM_input.firstChild.cloneNode(true));
     CM_input.removeChild(CM_input.firstChild);
 
+    //제작 버튼 생성
     let div = document.createElement("div");
     /*
 let outerBox = document.createElement("div");
@@ -144,8 +199,18 @@ innerBox.setAttribute("class", "input-status el-input");
         main(CM_name);
     };
 
+    //삭제 버튼 생성
+    let del_button = document.querySelector("#app > div.main-frame > form > div:nth-child(4) > div > span > span > button").cloneNode(true);
+    del_button.innerText = "저장된 말딸 삭제"
+    del_button.onclick = () => {
+        let CM_name = CM_nameNode.value;
+        deleteSaves(CM_name);
+    };
+
+
     div.appendChild(CM_input);
     div.appendChild(button);
+    div.appendChild(del_button);
 
     return div;
 }
