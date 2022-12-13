@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
 // @match        http://race-ko.wf-calc.net/
@@ -14,6 +14,8 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.2 챔미명 안써도 되게 업데이트
+
 1.1 저장된 말딸 일괄 삭제 버튼 추가.
 
 1.0 완성
@@ -89,13 +91,15 @@ var main = async function(CM_name) {
         document.querySelector("#app > div.main-frame > form > div:nth-child(28) > div.el-dialog__wrapper > div > div.el-dialog__body").innerText.replace(".... ", ratio);
         let simulateResults = await simulate();//시뮬
 
-
-
-        if (CM_name === '') {
-            row['챔미'] = words[0];
+        if (CM_name === '') { //전체 필터링이고
+            /*if (words.length === 3) row['챔미'] = words[0]; //레오 수루젠 12345
+            else if (words.length === 2) row['챔미'] = ""; //수루젠 12345
+            else row['챔미'] = "";*/
+            row['챔미'] = words[words.length-3];
         }
-        row['말딸'] = words[1];
-        row['평점'] = words[2];
+
+        row['말딸'] = words[words.length-2];
+        row['평점'] = words[words.length-1];
         row['최대 스퍼트 비율'] = simulateResults[0];
         row['평균 랩타임'] = simulateResults[1];
         row['베스트 랩타임'] = simulateResults[2];
