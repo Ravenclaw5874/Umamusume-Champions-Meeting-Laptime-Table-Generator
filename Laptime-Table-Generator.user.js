@@ -95,7 +95,7 @@ var main = async function(CM_name) {
             /*if (words.length === 3) row['챔미'] = words[0]; //레오 수루젠 12345
             else if (words.length === 2) row['챔미'] = ""; //수루젠 12345
             else row['챔미'] = "";*/
-            row['챔미'] = words[words.length-3];
+            row['필터'] = words[words.length-3];
         }
 
         row['말딸'] = words[words.length-2];
