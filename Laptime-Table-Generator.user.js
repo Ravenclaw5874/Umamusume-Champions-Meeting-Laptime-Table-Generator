@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.2.1
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
 // @match        http://race-ko.wf-calc.net/
@@ -14,6 +14,7 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.2.1 csv->tsv 변경
 1.2 챔미명 안써도 되게 업데이트
 
 1.1 저장된 말딸 일괄 삭제 버튼 추가.
@@ -117,8 +118,20 @@ var main = async function(CM_name) {
         link.click();
         document.body.removeChild(link);
     };
+    function downloadDictionaryArrayAsTSV(dictionaryArray, filename) {
+        const keys = Object.keys(dictionaryArray[0]);
+        const rows = [keys, ...dictionaryArray.map(obj => keys.map(key => obj[key]))];
+        const tsv = /*firstLine + */rows.map(row => row.join('\t')).join('\n');
+        const blob = new Blob([tsv], { type: 'text/tab-separated-values' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `${filename}.tsv`;
+        link.href = url;
+        link.click();
+    }
     let filename = (CM_name === ''? '전체 기록표':`${CM_name}배 전체 기록표`);
-    downloadUnicodeCSV(filename, result);
+    //downloadUnicodeCSV(filename, result);
+    downloadDictionaryArrayAsTSV(result, filename)
 
 }
 
