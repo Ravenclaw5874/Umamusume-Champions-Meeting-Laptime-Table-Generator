@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.2.1
+// @version      1.2.2
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
 // @match        http://race-ko.wf-calc.net/
@@ -14,6 +14,7 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.2.2 풀 스퍼트 평균을 결과에 추가
 1.2.1 csv->tsv 변경
 1.2 챔미명 안써도 되게 업데이트
 
@@ -34,6 +35,7 @@ function simulate() {
 
                 let spurtRatio = document.querySelector("#app > div.main-frame > div:nth-child(5) > table:nth-child(4) > tr:nth-child(2) > td:nth-child(1)").innerText;
                 let average = document.querySelector("#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(2)").innerText;
+                let full_spurt_average = document.querySelector("#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(3) > td:nth-child(2)").innerText;
                 let fastest = document.querySelector("#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(4)").innerText;
 
                 //전체 진행도 갱신
@@ -41,7 +43,7 @@ function simulate() {
                 //updateProgressBar( parseInt(currentSimulateCount/totalSimulateCount*100) );
 
                 //결과값 반환
-                let result = [spurtRatio, average, fastest];
+                let result = [spurtRatio, average, full_spurt_average, fastest];
                 resolve(result);
             }
         });
@@ -103,7 +105,8 @@ var main = async function(CM_name) {
         row['평점'] = words[words.length-1];
         row['최대 스퍼트 비율'] = simulateResults[0];
         row['평균 랩타임'] = simulateResults[1];
-        row['베스트 랩타임'] = simulateResults[2];
+        row['풀 스퍼트 평균'] = simulateResults[2];
+        row['베스트 랩타임'] = simulateResults[3];
 
         result.push(row);
         progressbar.parentNode.removeChild(inserted_progess);
