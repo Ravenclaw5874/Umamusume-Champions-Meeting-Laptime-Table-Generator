@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.2.2
+// @version      1.2.3
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
 // @match        http://race-ko.wf-calc.net/
@@ -14,6 +14,7 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.2.3 각질을 결과에 추가
 1.2.2 풀 스퍼트 평균을 결과에 추가
 1.2.1 csv->tsv 변경
 1.2 챔미명 안써도 되게 업데이트
@@ -101,7 +102,14 @@ var main = async function(CM_name) {
             row['필터'] = words[words.length-3];
         }
 
+        //각질 가져오기
+        await document.querySelector("#app > div.main-frame > form > div:nth-child(14) > div > div > div").click();
+        let dropDownNodes = document.querySelectorAll("body > div.el-select-dropdown.el-popper");
+        let strategy_Parent = dropDownNodes[dropDownNodes.length-1].querySelector("div > div > ul"); //각질
+        let userSelected_Strategy = strategy_Parent.querySelector("ul > li.selected");
+
         row['말딸'] = words[words.length-2];
+        row['각질'] = userSelected_Strategy.innerText;
         row['평점'] = words[words.length-1];
         row['최대 스퍼트 비율'] = simulateResults[0];
         row['평균 랩타임'] = simulateResults[1];
