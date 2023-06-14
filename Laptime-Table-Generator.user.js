@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.2.3
+// @version      1.2.4
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
 // @match        http://race-ko.wf-calc.net/
@@ -14,6 +14,7 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.2.4 필터 placeholder 변경
 1.2.3 각질을 결과에 추가
 1.2.2 풀 스퍼트 평균을 결과에 추가
 1.2.1 csv->tsv 변경
@@ -201,9 +202,9 @@ function createNode() {
     //챔미 이름 필터 칸 생성
     let CM_input = document.querySelector("#app > div.main-frame > form > div:nth-child(8)").cloneNode(true);
     let CM_nameNode = CM_input.querySelector("div > div > input");
-    CM_nameNode.setAttribute("placeholder", "전체");
-    CM_input.firstChild.innerText = "배";
-    CM_input.appendChild(CM_input.firstChild.cloneNode(true));
+    CM_nameNode.setAttribute("placeholder", "필터");
+    //CM_input.firstChild.innerText = "배";
+    //CM_input.appendChild(CM_input.firstChild.cloneNode(true));
     CM_input.removeChild(CM_input.firstChild);
 
     //제작 버튼 생성
