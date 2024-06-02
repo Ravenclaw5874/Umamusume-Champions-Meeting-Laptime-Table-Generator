@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.2.4
+// @version      1.3.0
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
-// @match        http://race-ko.wf-calc.net/
 // @match        http://race.wf-calc.net/
+// @match        https://ravenclaw5874.github.io/uma-emu/
 // @icon         https://img1.daumcdn.net/thumb/C151x151/?fname=https%3A%2F%2Ft1.daumcdn.net%2Fcafeattach%2F1ZK1D%2F80ed3bb76fa6ce0a4a0c7a9cc33d55430f797e35
 // @grant        none
 // @require      http://code.jquery.com/jquery-3.6.1.min.js
@@ -14,6 +14,8 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.3.0 2주년 시뮬로 변경
+
 1.2.4 필터 placeholder 변경
 1.2.3 각질을 결과에 추가
 1.2.2 풀 스퍼트 평균을 결과에 추가
@@ -24,6 +26,24 @@
 
 1.0 완성
 */
+const selector = {
+    "완주율" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(4) > tr:nth-child(2) > td:nth-child(1)",
+    "평균" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(2)",
+    "풀스퍼트 평균" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(3) > td:nth-child(2)",
+    "베스트" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(4)",
+    "시뮬 메시지" : "#app > div.main-frame > form > div:nth-child(30) > div.el-dialog__wrapper > div > div.el-dialog__body",
+    "진행도" : "#app > div.main-frame > form > div:nth-child(30) > div.el-dialog__wrapper > div > div.el-dialog__body > div",
+    "n번 버튼" : "#app > div.main-frame > form > div:nth-child(30) > div:nth-child(1) > div > button",
+    "한번 버튼" : "#app > div.main-frame > form > div:nth-child(30) > div:nth-child(3) > div > button",
+    "프리셋 버튼" : "#app > div.main-frame > form > div:nth-child(2) > div > div",
+    "프리셋" : "body > div:last-child > div:nth-child(1) > div:nth-child(1) > ul > li.el-select-dropdown__item",
+    "프리셋2" : "body > div.el-select-dropdown.el-popper:last-child > div.el-scrollbar > div:nth-child(1) > ul:nth-child(1) > li.el-select-dropdown__item",
+    "불러오기" : "#app > div.main-frame > form > div:nth-child(3) > div > button",
+    "각질 버튼" : "#app > div.main-frame > form > div:nth-child(14) > div > div > div",
+    "삭제 버튼" : "#app > div.main-frame > form > div:nth-child(4) > div > span > span > button",
+    "삭제 확인 버튼" : "body > div:last-child > div.el-popconfirm > div > button.el-button.el-button--primary.el-button--mini",
+    "속도" : "#app > div.main-frame > form > div:nth-child(8)",
+};
 
 function simulate() {
     return new Promise(async resolve => {
@@ -35,10 +55,10 @@ function simulate() {
                 //감시자 제거
                 observer.disconnect();
 
-                let spurtRatio = document.querySelector("#app > div.main-frame > div:nth-child(5) > table:nth-child(4) > tr:nth-child(2) > td:nth-child(1)").innerText;
-                let average = document.querySelector("#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(2)").innerText;
-                let full_spurt_average = document.querySelector("#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(3) > td:nth-child(2)").innerText;
-                let fastest = document.querySelector("#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(4)").innerText;
+                let spurtRatio = document.querySelector(selector["완주율"]).innerText;
+                let average = document.querySelector(selector["평균"]).innerText;
+                let full_spurt_average = document.querySelector(selector["풀스퍼트 평균"]).innerText;
+                let fastest = document.querySelector(selector["베스트"]).innerText;
 
                 //전체 진행도 갱신
                 //once? currentSimulateCount+=1: currentSimulateCount+=userSimulateCount;
@@ -50,14 +70,14 @@ function simulate() {
             }
         });
 
-        let target = document.querySelector("#app > div.main-frame > form > div:nth-child(28) > div.el-dialog__wrapper > div > div.el-dialog__body > div");
+        let target = document.querySelector(selector["진행도"]);
         let option = { attributes: true };
 
         //감시자 생성
         observer.observe(target, option);
 
         //n번 시뮬
-        await document.querySelector("#app > div.main-frame > form > div:nth-child(28) > div:nth-child(1) > div > button").click();
+        await document.querySelector(selector["n번 버튼"]).click();
 
         //document.querySelector("body > div.v-modal").remove();
     });
@@ -66,12 +86,12 @@ function simulate() {
 var main = async function(CM_name) {
     let result = [];
     //진행도 바 생성을 위한 한번 시뮬
-    await document.querySelector("#app > div.main-frame > form > div:nth-child(28) > div:nth-child(3) > div > button").click();
+    await document.querySelector(selector["한번 버튼"]).click();
 
-    await document.querySelector("#app > div.main-frame > form > div:nth-child(2) > div > div").click();
-    await document.querySelector("#app > div.main-frame > form > div:nth-child(2) > div > div").click();
+    await document.querySelector(selector["프리셋 버튼"]).click();
+    await document.querySelector(selector["프리셋 버튼"]).click();
 
-    let saved_Uma_NodeList_All = document.querySelectorAll("body > div:last-child > div:nth-child(1) > div:nth-child(1) > ul > li.el-select-dropdown__item");
+    let saved_Uma_NodeList_All = document.querySelectorAll(selector["프리셋"]);
     let saved_Uma_NodeList = [];
 
     //챔미 필터링
@@ -87,13 +107,13 @@ var main = async function(CM_name) {
         let row = {};
         let words = saved_Uma_NodeList[i].innerText.split(" ");
         await saved_Uma_NodeList[i].click();
-        await document.querySelector("#app > div.main-frame > form > div:nth-child(3) > div > button").click();//불러오기
+        await document.querySelector(selector["불러오기"]).click();//불러오기
         //전체 진행도
         let ratio = document.createTextNode(`(${i+1}/${saved_Uma_NodeList.length})`);
-        let progressbar = document.querySelector("#app > div.main-frame > form > div:nth-child(28) > div.el-dialog__wrapper > div > div.el-dialog__body > div");
+        let progressbar = document.querySelector(selector["진행도"]);
         let inserted_progess = progressbar.parentNode.insertBefore(ratio, progressbar);
 
-        document.querySelector("#app > div.main-frame > form > div:nth-child(28) > div.el-dialog__wrapper > div > div.el-dialog__body").innerText.replace(".... ", ratio);
+        document.querySelector(selector["시뮬 메시지"]).innerText.replace(".... ", ratio);
         let simulateResults = await simulate();//시뮬
 
         if (CM_name === '') { //전체 필터링이고
@@ -104,7 +124,7 @@ var main = async function(CM_name) {
         }
 
         //각질 가져오기
-        await document.querySelector("#app > div.main-frame > form > div:nth-child(14) > div > div > div").click();
+        await document.querySelector(selector["각질 버튼"]).click();
         let dropDownNodes = document.querySelectorAll("body > div.el-select-dropdown.el-popper");
         let strategy_Parent = dropDownNodes[dropDownNodes.length-1].querySelector("div > div > ul"); //각질
         let userSelected_Strategy = strategy_Parent.querySelector("ul > li.selected");
@@ -158,17 +178,15 @@ async function deleteSaves(CM_name) {
 
     //삭제처리
     //저장된 말딸 전부 불러오기
-    let savedListButtonNode = document.querySelector("#app > div.main-frame > form > div:nth-child(2) > div > div");
-    await savedListButtonNode.click();
-    await savedListButtonNode.click();
-    let savedUmaList = document.querySelectorAll("body > div.el-select-dropdown.el-popper:last-child > div.el-scrollbar > div:nth-child(1) > ul:nth-child(1) > li.el-select-dropdown__item");
+    await document.querySelector(selector["프리셋 버튼"]).click();
+    await document.querySelector(selector["프리셋 버튼"]).click();
+    let savedUmaList = document.querySelectorAll(selector["프리셋2"]);
     //console.log(savedUmaList);
 
     //삭제 버튼
-    let deleteButton = document.querySelector("#app > div.main-frame > form > div:nth-child(4) > div > span > span > button");
-    await deleteButton.click();
-    await deleteButton.click();
-    let deleteConfirmButton = document.querySelector("body > div:last-child > div.el-popconfirm > div > button.el-button.el-button--primary.el-button--mini");
+    await document.querySelector(selector["삭제 버튼"]).click();
+    await document.querySelector(selector["삭제 버튼"]).click();
+    let deleteConfirmButton = document.querySelector(selector["삭제 확인 버튼"]);
 
     //삭제 횟수 측정용
     let delete_count = 0;
@@ -200,7 +218,7 @@ async function deleteSaves(CM_name) {
 
 function createNode() {
     //챔미 이름 필터 칸 생성
-    let CM_input = document.querySelector("#app > div.main-frame > form > div:nth-child(8)").cloneNode(true);
+    let CM_input = document.querySelector(selector["속도"]).cloneNode(true);
     let CM_nameNode = CM_input.querySelector("div > div > input");
     CM_nameNode.setAttribute("placeholder", "필터");
     //CM_input.firstChild.innerText = "배";
@@ -229,7 +247,7 @@ innerBox.setAttribute("class", "input-status el-input");
     };
 
     //삭제 버튼 생성
-    let del_button = document.querySelector("#app > div.main-frame > form > div:nth-child(4) > div > span > span > button").cloneNode(true);
+    let del_button = document.querySelector(selector["삭제 버튼"]).cloneNode(true);
     del_button.innerText = "저장된 말딸 삭제"
     del_button.onclick = () => {
         let CM_name = CM_nameNode.value;
