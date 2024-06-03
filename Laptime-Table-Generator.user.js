@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.3.1
+// @version      1.3.2
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
 // @match        http://race.wf-calc.net/
@@ -15,6 +15,7 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.3.2 버그 수정
 1.3.1 1주년도 대응
 1.3.0 2주년 시뮬로 변경
 
@@ -33,7 +34,6 @@ const selector = {
     "평균" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(2)",
     "풀스퍼트 평균" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(3) > td:nth-child(2)",
     "베스트" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(4)",
-    "시뮬 메시지" : "#app > div.main-frame > form > div:nth-of-type() > div.el-dialog__wrapper > div > div.el-dialog__body",
     "프리셋 버튼" : "#app > div.main-frame > form > div:nth-child(2) > div > div",
     "프리셋" : "body > div:last-child > div:nth-child(1) > div:nth-child(1) > ul > li.el-select-dropdown__item",
     "프리셋2" : "body > div.el-select-dropdown.el-popper:last-child > div.el-scrollbar > div:nth-child(1) > ul:nth-child(1) > li.el-select-dropdown__item",
@@ -45,9 +45,10 @@ const selector = {
 };
 
 const xpath = {
-    "진행도" : "/html/body/div/div[1]/form/div[position()=22 or position()=23]/div[@class='el-dialog__wrapper']/div/div[@class='el-dialog__body']/div",
+    "진행도" : "/html/body/div/div[1]/form/div[position()=22 or position()=23]/div[6]/div/div[@class='el-dialog__body']/div",
     "n번 버튼" : "/html/body/div/div[1]/form/div[position()=22 or position()=23]/div[1]/div/button",
-    "한번 버튼" : "/html/body/div/div[1]/form/div[position()=22 or position()=23]/div[3]/div/button"
+    "한번 버튼" : "/html/body/div/div[1]/form/div[position()=22 or position()=23]/div[3]/div/button",
+    "시뮬 메시지" : "/html/body/div[1]/div[1]/form/div[position()=22 or position()=23]/div[6]/div/div[@class='el-dialog__body']"
 };
 
 //Xpath로 요소 찾기 확장형
@@ -123,7 +124,7 @@ var main = async function(CM_name) {
         let progressbar = document.xpath(xpath["진행도"]);
         let inserted_progess = progressbar.parentNode.insertBefore(ratio, progressbar);
 
-        document.querySelector(selector["시뮬 메시지"]).innerText.replace(".... ", ratio);
+        document.xpath(xpath["시뮬 메시지"]).innerText.replace(".... ", ratio);
         let simulateResults = await simulate();//시뮬
 
         if (CM_name === '') { //전체 필터링이고
