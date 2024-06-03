@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         우마무스메 챔미 기록표 제작기
 // @namespace    http://tampermonkey.net/
-// @version      1.3.0
+// @version      1.3.1
 // @description  우마무스메 레이스 에뮬레이터로 말딸들의 기록표를 만드는 스크립트입니다.
 // @author       Ravenclaw5874
 // @match        http://race.wf-calc.net/
+// @match        http://race-ko.wf-calc.net/
 // @match        https://ravenclaw5874.github.io/uma-emu/
 // @icon         https://img1.daumcdn.net/thumb/C151x151/?fname=https%3A%2F%2Ft1.daumcdn.net%2Fcafeattach%2F1ZK1D%2F80ed3bb76fa6ce0a4a0c7a9cc33d55430f797e35
 // @grant        none
@@ -14,6 +15,7 @@
 // ==/UserScript==
 
 /* 업데이트 로그
+1.3.1 1주년도 대응
 1.3.0 2주년 시뮬로 변경
 
 1.2.4 필터 placeholder 변경
@@ -31,10 +33,7 @@ const selector = {
     "평균" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(2)",
     "풀스퍼트 평균" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(3) > td:nth-child(2)",
     "베스트" : "#app > div.main-frame > div:nth-child(5) > table:nth-child(2) > tr:nth-child(2) > td:nth-child(4)",
-    "시뮬 메시지" : "#app > div.main-frame > form > div:nth-child(30) > div.el-dialog__wrapper > div > div.el-dialog__body",
-    "진행도" : "#app > div.main-frame > form > div:nth-child(30) > div.el-dialog__wrapper > div > div.el-dialog__body > div",
-    "n번 버튼" : "#app > div.main-frame > form > div:nth-child(30) > div:nth-child(1) > div > button",
-    "한번 버튼" : "#app > div.main-frame > form > div:nth-child(30) > div:nth-child(3) > div > button",
+    "시뮬 메시지" : "#app > div.main-frame > form > div:nth-of-type() > div.el-dialog__wrapper > div > div.el-dialog__body",
     "프리셋 버튼" : "#app > div.main-frame > form > div:nth-child(2) > div > div",
     "프리셋" : "body > div:last-child > div:nth-child(1) > div:nth-child(1) > ul > li.el-select-dropdown__item",
     "프리셋2" : "body > div.el-select-dropdown.el-popper:last-child > div.el-scrollbar > div:nth-child(1) > ul:nth-child(1) > li.el-select-dropdown__item",
@@ -44,6 +43,17 @@ const selector = {
     "삭제 확인 버튼" : "body > div:last-child > div.el-popconfirm > div > button.el-button.el-button--primary.el-button--mini",
     "속도" : "#app > div.main-frame > form > div:nth-child(8)",
 };
+
+const xpath = {
+    "진행도" : "/html/body/div/div[1]/form/div[position()=22 or position()=23]/div[@class='el-dialog__wrapper']/div/div[@class='el-dialog__body']/div",
+    "n번 버튼" : "/html/body/div/div[1]/form/div[position()=22 or position()=23]/div[1]/div/button",
+    "한번 버튼" : "/html/body/div/div[1]/form/div[position()=22 or position()=23]/div[3]/div/button"
+};
+
+//Xpath로 요소 찾기 확장형
+Node.prototype.xpath = function (xpath) {
+    return document.evaluate(xpath, this, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}
 
 function simulate() {
     return new Promise(async resolve => {
@@ -70,14 +80,14 @@ function simulate() {
             }
         });
 
-        let target = document.querySelector(selector["진행도"]);
+        let target = document.xpath(xpath["진행도"]);
         let option = { attributes: true };
 
         //감시자 생성
         observer.observe(target, option);
 
         //n번 시뮬
-        await document.querySelector(selector["n번 버튼"]).click();
+        await document.xpath(xpath["n번 버튼"]).click();
 
         //document.querySelector("body > div.v-modal").remove();
     });
@@ -86,7 +96,7 @@ function simulate() {
 var main = async function(CM_name) {
     let result = [];
     //진행도 바 생성을 위한 한번 시뮬
-    await document.querySelector(selector["한번 버튼"]).click();
+    await document.xpath(xpath["한번 버튼"]).click();
 
     await document.querySelector(selector["프리셋 버튼"]).click();
     await document.querySelector(selector["프리셋 버튼"]).click();
@@ -110,7 +120,7 @@ var main = async function(CM_name) {
         await document.querySelector(selector["불러오기"]).click();//불러오기
         //전체 진행도
         let ratio = document.createTextNode(`(${i+1}/${saved_Uma_NodeList.length})`);
-        let progressbar = document.querySelector(selector["진행도"]);
+        let progressbar = document.xpath(xpath["진행도"]);
         let inserted_progess = progressbar.parentNode.insertBefore(ratio, progressbar);
 
         document.querySelector(selector["시뮬 메시지"]).innerText.replace(".... ", ratio);
