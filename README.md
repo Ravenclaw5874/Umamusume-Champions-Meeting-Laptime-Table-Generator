@@ -5,7 +5,7 @@
 
 [스크립트 설치](https://github.com/Ravenclaw5874/Umamusume-Champions-Meeting-Laptime-Table-Generator/raw/main/Laptime-Table-Generator.user.js)
 
-설치 후 [한국 우마무스메 레이스 에뮬레이터](http://race-ko.wf-calc.net/#/champions-meeting) 사이트에서
+설치 후 [한국 우마무스메 레이스 에뮬레이터](https://ravenclaw5874.github.io/uma-emu/#/champions-meeting) 사이트에서
 
 ![](./저장형식v2.png)
 
